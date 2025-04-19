@@ -59,12 +59,20 @@ document.addEventListener("DOMContentLoaded", () => {
             const diasClase = document.getElementById("diasClase").value;
 
             if (!caracteresValidos(nombre) || !caracteresValidos(apellido)) {
-                alert("El nombre y apellido deben contener solo letras.");
+                Swal.fire({
+                    icon: 'error',
+                    title: '¡Error!',
+                    text: 'El nombre y apellido deben contener solo letras.',
+                });
                 return;
             }
 
             if (isNaN(edad) || edad <= 0) {
-                alert("La edad debe ser un número válido y mayor a 0.");
+                Swal.fire({
+                    icon: 'error',
+                    title: '¡Error!',
+                    text: 'La edad debe ser un número válido y mayor a 0.',
+                });
                 return;
             }
 
@@ -114,12 +122,17 @@ document.addEventListener("DOMContentLoaded", () => {
             <p><strong>Valor a pagar:</strong> $${datos.valorPagar}</p>
             <button id="confirmarBtn">Confirmar Inscripción</button>
             <button id="editarBtn">Editar Datos</button>
+            <button id="pagoBtn">Acceder al Pago en Línea</button>
         `;
 
         // Botón de confirmación
         const confirmarBtn = document.getElementById("confirmarBtn");
         confirmarBtn.addEventListener("click", () => {
-            alert("¡Gracias! Te has inscrito correctamente.");
+            Swal.fire({
+                icon: 'success',
+                title: '¡Gracias!',
+                text: 'Te has inscrito correctamente.',
+            });
             localStorage.removeItem('inscripcionData');
             location.reload(); // Recargar para mostrar el formulario nuevamente
         });
@@ -129,6 +142,38 @@ document.addEventListener("DOMContentLoaded", () => {
         editarBtn.addEventListener("click", () => {
             localStorage.removeItem('inscripcionData');
             location.reload();
+        });
+
+        // Botón de pago
+        const pagoBtn = document.getElementById("pagoBtn");
+        pagoBtn.addEventListener("click", async () => {
+            try {
+                const response = await fetch('https://api.celeriumpatinaje.com/pago', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ valor: datos.valorPagar }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al procesar el pago');
+                }
+
+                const data = await response.json();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pago Exitoso',
+                    text: `Tu pago de $${data.monto} ha sido procesado correctamente.`,
+                });
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                });
+            }
         });
     }
 });
